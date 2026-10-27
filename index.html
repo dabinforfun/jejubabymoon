@@ -1,0 +1,985 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<style>body{margin:0}[hidden]{display:none!important}</style>
+</head>
+<body>
+<title>제주 태교여행</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Gothic+A1:wght@400;500;700;800&family=Josefin+Sans:wght@500;600;700&display=swap">
+<style>
+/* required styles */
+
+.leaflet-pane,
+.leaflet-tile,
+.leaflet-marker-icon,
+.leaflet-marker-shadow,
+.leaflet-tile-container,
+.leaflet-pane > svg,
+.leaflet-pane > canvas,
+.leaflet-zoom-box,
+.leaflet-image-layer,
+.leaflet-layer {
+	position: absolute;
+	left: 0;
+	top: 0;
+	}
+.leaflet-container {
+	overflow: hidden;
+	}
+.leaflet-tile,
+.leaflet-marker-icon,
+.leaflet-marker-shadow {
+	-webkit-user-select: none;
+	   -moz-user-select: none;
+	        user-select: none;
+	  -webkit-user-drag: none;
+	}
+/* Prevents IE11 from highlighting tiles in blue */
+.leaflet-tile::selection {
+	background: transparent;
+}
+/* Safari renders non-retina tile on retina better with this, but Chrome is worse */
+.leaflet-safari .leaflet-tile {
+	image-rendering: -webkit-optimize-contrast;
+	}
+/* hack that prevents hw layers "stretching" when loading new tiles */
+.leaflet-safari .leaflet-tile-container {
+	width: 1600px;
+	height: 1600px;
+	-webkit-transform-origin: 0 0;
+	}
+.leaflet-marker-icon,
+.leaflet-marker-shadow {
+	display: block;
+	}
+/* .leaflet-container svg: reset svg max-width decleration shipped in Joomla! (joomla.org) 3.x */
+/* .leaflet-container img: map is broken in FF if you have max-width: 100% on tiles */
+.leaflet-container .leaflet-overlay-pane svg {
+	max-width: none !important;
+	max-height: none !important;
+	}
+.leaflet-container .leaflet-marker-pane img,
+.leaflet-container .leaflet-shadow-pane img,
+.leaflet-container .leaflet-tile-pane img,
+.leaflet-container img.leaflet-image-layer,
+.leaflet-container .leaflet-tile {
+	max-width: none !important;
+	max-height: none !important;
+	width: auto;
+	padding: 0;
+	}
+
+.leaflet-container img.leaflet-tile {
+	/* See: https://bugs.chromium.org/p/chromium/issues/detail?id=600120 */
+	mix-blend-mode: plus-lighter;
+}
+
+.leaflet-container.leaflet-touch-zoom {
+	-ms-touch-action: pan-x pan-y;
+	touch-action: pan-x pan-y;
+	}
+.leaflet-container.leaflet-touch-drag {
+	-ms-touch-action: pinch-zoom;
+	/* Fallback for FF which doesn't support pinch-zoom */
+	touch-action: none;
+	touch-action: pinch-zoom;
+}
+.leaflet-container.leaflet-touch-drag.leaflet-touch-zoom {
+	-ms-touch-action: none;
+	touch-action: none;
+}
+.leaflet-container {
+	-webkit-tap-highlight-color: transparent;
+}
+.leaflet-container a {
+	-webkit-tap-highlight-color: rgba(51, 181, 229, 0.4);
+}
+.leaflet-tile {
+	filter: inherit;
+	visibility: hidden;
+	}
+.leaflet-tile-loaded {
+	visibility: inherit;
+	}
+.leaflet-zoom-box {
+	width: 0;
+	height: 0;
+	-moz-box-sizing: border-box;
+	     box-sizing: border-box;
+	z-index: 800;
+	}
+/* workaround for https://bugzilla.mozilla.org/show_bug.cgi?id=888319 */
+.leaflet-overlay-pane svg {
+	-moz-user-select: none;
+	}
+
+.leaflet-pane         { z-index: 400; }
+
+.leaflet-tile-pane    { z-index: 200; }
+.leaflet-overlay-pane { z-index: 400; }
+.leaflet-shadow-pane  { z-index: 500; }
+.leaflet-marker-pane  { z-index: 600; }
+.leaflet-tooltip-pane   { z-index: 650; }
+.leaflet-popup-pane   { z-index: 700; }
+
+.leaflet-map-pane canvas { z-index: 100; }
+.leaflet-map-pane svg    { z-index: 200; }
+
+.leaflet-vml-shape {
+	width: 1px;
+	height: 1px;
+	}
+.lvml {
+	behavior: url(#default#VML);
+	display: inline-block;
+	position: absolute;
+	}
+
+
+/* control positioning */
+
+.leaflet-control {
+	position: relative;
+	z-index: 800;
+	pointer-events: visiblePainted; /* IE 9-10 doesn't have auto */
+	pointer-events: auto;
+	}
+.leaflet-top,
+.leaflet-bottom {
+	position: absolute;
+	z-index: 1000;
+	pointer-events: none;
+	}
+.leaflet-top {
+	top: 0;
+	}
+.leaflet-right {
+	right: 0;
+	}
+.leaflet-bottom {
+	bottom: 0;
+	}
+.leaflet-left {
+	left: 0;
+	}
+.leaflet-control {
+	float: left;
+	clear: both;
+	}
+.leaflet-right .leaflet-control {
+	float: right;
+	}
+.leaflet-top .leaflet-control {
+	margin-top: 10px;
+	}
+.leaflet-bottom .leaflet-control {
+	margin-bottom: 10px;
+	}
+.leaflet-left .leaflet-control {
+	margin-left: 10px;
+	}
+.leaflet-right .leaflet-control {
+	margin-right: 10px;
+	}
+
+
+/* zoom and fade animations */
+
+.leaflet-fade-anim .leaflet-popup {
+	opacity: 0;
+	-webkit-transition: opacity 0.2s linear;
+	   -moz-transition: opacity 0.2s linear;
+	        transition: opacity 0.2s linear;
+	}
+.leaflet-fade-anim .leaflet-map-pane .leaflet-popup {
+	opacity: 1;
+	}
+.leaflet-zoom-animated {
+	-webkit-transform-origin: 0 0;
+	    -ms-transform-origin: 0 0;
+	        transform-origin: 0 0;
+	}
+svg.leaflet-zoom-animated {
+	will-change: transform;
+}
+
+.leaflet-zoom-anim .leaflet-zoom-animated {
+	-webkit-transition: -webkit-transform 0.25s cubic-bezier(0,0,0.25,1);
+	   -moz-transition:    -moz-transform 0.25s cubic-bezier(0,0,0.25,1);
+	        transition:         transform 0.25s cubic-bezier(0,0,0.25,1);
+	}
+.leaflet-zoom-anim .leaflet-tile,
+.leaflet-pan-anim .leaflet-tile {
+	-webkit-transition: none;
+	   -moz-transition: none;
+	        transition: none;
+	}
+
+.leaflet-zoom-anim .leaflet-zoom-hide {
+	visibility: hidden;
+	}
+
+
+/* cursors */
+
+.leaflet-interactive {
+	cursor: pointer;
+	}
+.leaflet-grab {
+	cursor: -webkit-grab;
+	cursor:    -moz-grab;
+	cursor:         grab;
+	}
+.leaflet-crosshair,
+.leaflet-crosshair .leaflet-interactive {
+	cursor: crosshair;
+	}
+.leaflet-popup-pane,
+.leaflet-control {
+	cursor: auto;
+	}
+.leaflet-dragging .leaflet-grab,
+.leaflet-dragging .leaflet-grab .leaflet-interactive,
+.leaflet-dragging .leaflet-marker-draggable {
+	cursor: move;
+	cursor: -webkit-grabbing;
+	cursor:    -moz-grabbing;
+	cursor:         grabbing;
+	}
+
+/* marker & overlays interactivity */
+.leaflet-marker-icon,
+.leaflet-marker-shadow,
+.leaflet-image-layer,
+.leaflet-pane > svg path,
+.leaflet-tile-container {
+	pointer-events: none;
+	}
+
+.leaflet-marker-icon.leaflet-interactive,
+.leaflet-image-layer.leaflet-interactive,
+.leaflet-pane > svg path.leaflet-interactive,
+svg.leaflet-image-layer.leaflet-interactive path {
+	pointer-events: visiblePainted; /* IE 9-10 doesn't have auto */
+	pointer-events: auto;
+	}
+
+/* visual tweaks */
+
+.leaflet-container {
+	background: #ddd;
+	outline-offset: 1px;
+	}
+.leaflet-container a {
+	color: #0078A8;
+	}
+.leaflet-zoom-box {
+	border: 2px dotted #38f;
+	background: rgba(255,255,255,0.5);
+	}
+
+
+/* general typography */
+.leaflet-container {
+	font-family: "Helvetica Neue", Arial, Helvetica, sans-serif;
+	font-size: 12px;
+	font-size: 0.75rem;
+	line-height: 1.5;
+	}
+
+
+/* general toolbar styles */
+
+.leaflet-bar {
+	box-shadow: 0 1px 5px rgba(0,0,0,0.65);
+	border-radius: 4px;
+	}
+.leaflet-bar a {
+	background-color: #fff;
+	border-bottom: 1px solid #ccc;
+	width: 26px;
+	height: 26px;
+	line-height: 26px;
+	display: block;
+	text-align: center;
+	text-decoration: none;
+	color: black;
+	}
+.leaflet-bar a,
+.leaflet-control-layers-toggle {
+	background-position: 50% 50%;
+	background-repeat: no-repeat;
+	display: block;
+	}
+.leaflet-bar a:hover,
+.leaflet-bar a:focus {
+	background-color: #f4f4f4;
+	}
+.leaflet-bar a:first-child {
+	border-top-left-radius: 4px;
+	border-top-right-radius: 4px;
+	}
+.leaflet-bar a:last-child {
+	border-bottom-left-radius: 4px;
+	border-bottom-right-radius: 4px;
+	border-bottom: none;
+	}
+.leaflet-bar a.leaflet-disabled {
+	cursor: default;
+	background-color: #f4f4f4;
+	color: #bbb;
+	}
+
+.leaflet-touch .leaflet-bar a {
+	width: 30px;
+	height: 30px;
+	line-height: 30px;
+	}
+.leaflet-touch .leaflet-bar a:first-child {
+	border-top-left-radius: 2px;
+	border-top-right-radius: 2px;
+	}
+.leaflet-touch .leaflet-bar a:last-child {
+	border-bottom-left-radius: 2px;
+	border-bottom-right-radius: 2px;
+	}
+
+/* zoom control */
+
+.leaflet-control-zoom-in,
+.leaflet-control-zoom-out {
+	font: bold 18px 'Lucida Console', Monaco, monospace;
+	text-indent: 1px;
+	}
+
+.leaflet-touch .leaflet-control-zoom-in, .leaflet-touch .leaflet-control-zoom-out  {
+	font-size: 22px;
+	}
+
+
+/* layers control */
+
+.leaflet-control-layers {
+	box-shadow: 0 1px 5px rgba(0,0,0,0.4);
+	background: #fff;
+	border-radius: 5px;
+	}
+.leaflet-control-layers-toggle {
+	background-image: none;
+	width: 36px;
+	height: 36px;
+	}
+.leaflet-retina .leaflet-control-layers-toggle {
+	background-image: none;
+	background-size: 26px 26px;
+	}
+.leaflet-touch .leaflet-control-layers-toggle {
+	width: 44px;
+	height: 44px;
+	}
+.leaflet-control-layers .leaflet-control-layers-list,
+.leaflet-control-layers-expanded .leaflet-control-layers-toggle {
+	display: none;
+	}
+.leaflet-control-layers-expanded .leaflet-control-layers-list {
+	display: block;
+	position: relative;
+	}
+.leaflet-control-layers-expanded {
+	padding: 6px 10px 6px 6px;
+	color: #333;
+	background: #fff;
+	}
+.leaflet-control-layers-scrollbar {
+	overflow-y: scroll;
+	overflow-x: hidden;
+	padding-right: 5px;
+	}
+.leaflet-control-layers-selector {
+	margin-top: 2px;
+	position: relative;
+	top: 1px;
+	}
+.leaflet-control-layers label {
+	display: block;
+	font-size: 13px;
+	font-size: 1.08333em;
+	}
+.leaflet-control-layers-separator {
+	height: 0;
+	border-top: 1px solid #ddd;
+	margin: 5px -10px 5px -6px;
+	}
+
+/* Default icon URLs */
+.leaflet-default-icon-path { /* used only in path-guessing heuristic, see L.Icon.Default */
+	background-image: none;
+	}
+
+
+/* attribution and scale controls */
+
+.leaflet-container .leaflet-control-attribution {
+	background: #fff;
+	background: rgba(255, 255, 255, 0.8);
+	margin: 0;
+	}
+.leaflet-control-attribution,
+.leaflet-control-scale-line {
+	padding: 0 5px;
+	color: #333;
+	line-height: 1.4;
+	}
+.leaflet-control-attribution a {
+	text-decoration: none;
+	}
+.leaflet-control-attribution a:hover,
+.leaflet-control-attribution a:focus {
+	text-decoration: underline;
+	}
+.leaflet-attribution-flag {
+	display: inline !important;
+	vertical-align: baseline !important;
+	width: 1em;
+	height: 0.6669em;
+	}
+.leaflet-left .leaflet-control-scale {
+	margin-left: 5px;
+	}
+.leaflet-bottom .leaflet-control-scale {
+	margin-bottom: 5px;
+	}
+.leaflet-control-scale-line {
+	border: 2px solid #777;
+	border-top: none;
+	line-height: 1.1;
+	padding: 2px 5px 1px;
+	white-space: nowrap;
+	-moz-box-sizing: border-box;
+	     box-sizing: border-box;
+	background: rgba(255, 255, 255, 0.8);
+	text-shadow: 1px 1px #fff;
+	}
+.leaflet-control-scale-line:not(:first-child) {
+	border-top: 2px solid #777;
+	border-bottom: none;
+	margin-top: -2px;
+	}
+.leaflet-control-scale-line:not(:first-child):not(:last-child) {
+	border-bottom: 2px solid #777;
+	}
+
+.leaflet-touch .leaflet-control-attribution,
+.leaflet-touch .leaflet-control-layers,
+.leaflet-touch .leaflet-bar {
+	box-shadow: none;
+	}
+.leaflet-touch .leaflet-control-layers,
+.leaflet-touch .leaflet-bar {
+	border: 2px solid rgba(0,0,0,0.2);
+	background-clip: padding-box;
+	}
+
+
+/* popup */
+
+.leaflet-popup {
+	position: absolute;
+	text-align: center;
+	margin-bottom: 20px;
+	}
+.leaflet-popup-content-wrapper {
+	padding: 1px;
+	text-align: left;
+	border-radius: 12px;
+	}
+.leaflet-popup-content {
+	margin: 13px 24px 13px 20px;
+	line-height: 1.3;
+	font-size: 13px;
+	font-size: 1.08333em;
+	min-height: 1px;
+	}
+.leaflet-popup-content p {
+	margin: 17px 0;
+	margin: 1.3em 0;
+	}
+.leaflet-popup-tip-container {
+	width: 40px;
+	height: 20px;
+	position: absolute;
+	left: 50%;
+	margin-top: -1px;
+	margin-left: -20px;
+	overflow: hidden;
+	pointer-events: none;
+	}
+.leaflet-popup-tip {
+	width: 17px;
+	height: 17px;
+	padding: 1px;
+
+	margin: -10px auto 0;
+	pointer-events: auto;
+
+	-webkit-transform: rotate(45deg);
+	   -moz-transform: rotate(45deg);
+	    -ms-transform: rotate(45deg);
+	        transform: rotate(45deg);
+	}
+.leaflet-popup-content-wrapper,
+.leaflet-popup-tip {
+	background: white;
+	color: #333;
+	box-shadow: 0 3px 14px rgba(0,0,0,0.4);
+	}
+.leaflet-container a.leaflet-popup-close-button {
+	position: absolute;
+	top: 0;
+	right: 0;
+	border: none;
+	text-align: center;
+	width: 24px;
+	height: 24px;
+	font: 16px/24px Tahoma, Verdana, sans-serif;
+	color: #757575;
+	text-decoration: none;
+	background: transparent;
+	}
+.leaflet-container a.leaflet-popup-close-button:hover,
+.leaflet-container a.leaflet-popup-close-button:focus {
+	color: #585858;
+	}
+.leaflet-popup-scrolled {
+	overflow: auto;
+	}
+
+.leaflet-oldie .leaflet-popup-content-wrapper {
+	-ms-zoom: 1;
+	}
+.leaflet-oldie .leaflet-popup-tip {
+	width: 24px;
+	margin: 0 auto;
+
+	-ms-filter: "progid:DXImageTransform.Microsoft.Matrix(M11=0.70710678, M12=0.70710678, M21=-0.70710678, M22=0.70710678)";
+	filter: progid:DXImageTransform.Microsoft.Matrix(M11=0.70710678, M12=0.70710678, M21=-0.70710678, M22=0.70710678);
+	}
+
+.leaflet-oldie .leaflet-control-zoom,
+.leaflet-oldie .leaflet-control-layers,
+.leaflet-oldie .leaflet-popup-content-wrapper,
+.leaflet-oldie .leaflet-popup-tip {
+	border: 1px solid #999;
+	}
+
+
+/* div icon */
+
+.leaflet-div-icon {
+	background: #fff;
+	border: 1px solid #666;
+	}
+
+
+/* Tooltip */
+/* Base styles for the element that has a tooltip */
+.leaflet-tooltip {
+	position: absolute;
+	padding: 6px;
+	background-color: #fff;
+	border: 1px solid #fff;
+	border-radius: 3px;
+	color: #222;
+	white-space: nowrap;
+	-webkit-user-select: none;
+	-moz-user-select: none;
+	-ms-user-select: none;
+	user-select: none;
+	pointer-events: none;
+	box-shadow: 0 1px 3px rgba(0,0,0,0.4);
+	}
+.leaflet-tooltip.leaflet-interactive {
+	cursor: pointer;
+	pointer-events: auto;
+	}
+.leaflet-tooltip-top:before,
+.leaflet-tooltip-bottom:before,
+.leaflet-tooltip-left:before,
+.leaflet-tooltip-right:before {
+	position: absolute;
+	pointer-events: none;
+	border: 6px solid transparent;
+	background: transparent;
+	content: "";
+	}
+
+/* Directions */
+
+.leaflet-tooltip-bottom {
+	margin-top: 6px;
+}
+.leaflet-tooltip-top {
+	margin-top: -6px;
+}
+.leaflet-tooltip-bottom:before,
+.leaflet-tooltip-top:before {
+	left: 50%;
+	margin-left: -6px;
+	}
+.leaflet-tooltip-top:before {
+	bottom: 0;
+	margin-bottom: -12px;
+	border-top-color: #fff;
+	}
+.leaflet-tooltip-bottom:before {
+	top: 0;
+	margin-top: -12px;
+	margin-left: -6px;
+	border-bottom-color: #fff;
+	}
+.leaflet-tooltip-left {
+	margin-left: -6px;
+}
+.leaflet-tooltip-right {
+	margin-left: 6px;
+}
+.leaflet-tooltip-left:before,
+.leaflet-tooltip-right:before {
+	top: 50%;
+	margin-top: -6px;
+	}
+.leaflet-tooltip-left:before {
+	right: 0;
+	margin-right: -12px;
+	border-left-color: #fff;
+	}
+.leaflet-tooltip-right:before {
+	left: 0;
+	margin-left: -12px;
+	border-right-color: #fff;
+	}
+
+/* Printing */
+
+@media print {
+	/* Prevent printers from removing background-images of controls. */
+	.leaflet-control {
+		-webkit-print-color-adjust: exact;
+		print-color-adjust: exact;
+		}
+	}
+
+/* Layout: color-block poster. Map fills the left; the right column is a stack of flat paper tiles
+   (brand block → day tabs → itinerary), echoing the reference's card-swatch grid. Single light theme by choice. */
+:root{
+  --ivory:#FFFCF2; --pink:#D38FB5; --neon:#EAFF3D; --olive:#AA9D58; --moss:#3A3408; --sky:#A8C8FF; --maroon:#560000; --sage:#D3D1A6;
+  --ink:#3A3408; --ink-soft:#6B6232; --rule:rgba(58,52,8,.16);
+  --d1:#560000; --d1-on:#FFFCF2;
+  --d2:#D38FB5; --d2-on:#3A0A0A;
+  --d3:#A8C8FF; --d3-on:#3A3408;
+  --f-ko:"Gothic A1","Apple SD Gothic Neo","Malgun Gothic",sans-serif;
+  --f-en:"Josefin Sans","Gothic A1",sans-serif;
+  color-scheme:light;
+}
+html,body{height:100%}
+body{background:var(--ivory);color:var(--ink);font-family:var(--f-ko);font-size:14px;line-height:1.55;-webkit-font-smoothing:antialiased}
+.grain{position:relative;isolation:isolate}
+.grain::after{content:"";position:absolute;inset:0;pointer-events:none;z-index:0;opacity:.22;mix-blend-mode:multiply;
+  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 .45  0 0 0 0 .4  0 0 0 0 .3  0 0 0 .55 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>")}
+.grain>*{position:relative;z-index:1}
+.en{font-family:var(--f-en);text-transform:uppercase;letter-spacing:.08em;font-weight:600}
+
+.app{height:100%;display:grid;grid-template-columns:1fr minmax(440px,540px)}
+.mapwrap{position:relative;min-width:0}
+#map{position:absolute;inset:0;background:#DDE9FF}
+.side{min-width:0;display:flex;flex-direction:column;overflow:hidden;background:var(--ivory)}
+
+/* brand block */
+.brand{display:grid;grid-template-columns:1fr;border-bottom:1px solid var(--rule)}
+.brand>div{padding:16px 18px;min-width:0}
+.b-title{background:var(--ivory);display:flex;flex-direction:column;justify-content:space-between;gap:28px;padding-block:20px 22px!important;padding-right:max(18px,env(safe-area-inset-right,0px))!important}
+.b-row{display:flex;justify-content:space-between;align-items:baseline;gap:12px;flex-wrap:wrap}
+.b-mark{font-size:14px;font-weight:700;letter-spacing:.16em;color:var(--maroon)}
+.b-date{font-size:11px;color:var(--ink-soft)}
+.b-title h1{margin:0;font-family:var(--f-ko);font-weight:800;font-size:28px;line-height:1.25;letter-spacing:-.03em;color:var(--moss);text-wrap:balance;word-break:keep-all}
+
+/* tabs as swatches */
+.tabs{display:grid;grid-template-columns:repeat(4,1fr)}
+.tab{appearance:none;border:0;border-radius:0;font:inherit;cursor:pointer;text-align:left;padding:12px 12px 11px;display:flex;flex-direction:column;gap:2px;min-width:0;background:var(--bg);color:var(--fg);position:relative}
+.tab .en{font-size:12px;letter-spacing:.1em}
+.tab small{font-size:11px;opacity:.8;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tab::before{content:"";position:absolute;left:12px;bottom:7px;width:14px;height:2px;background:currentColor;opacity:0;transition:width .2s,opacity .2s}
+.tab[aria-pressed="true"]::before{opacity:1;width:22px}
+.tab[aria-pressed="false"]{filter:saturate(.75) brightness(1.03)}
+.tab:focus-visible,.item:focus-visible,.alt:focus-visible{outline:2px solid var(--moss);outline-offset:-2px}
+#tab-all{--bg:var(--olive);--fg:var(--moss)}
+#tab-1{--bg:var(--d1);--fg:var(--d1-on)}
+#tab-2{--bg:var(--pink);--fg:#3A0A0A}
+#tab-3{--bg:var(--sky);--fg:var(--moss)}
+
+/* itinerary */
+.list{flex:1;overflow-y:auto;padding-bottom:28px}
+.day+.day{margin-top:4px}
+.dayhead{display:flex;align-items:baseline;justify-content:space-between;gap:10px;padding-block:14px 12px;padding-left:18px;padding-right:max(18px,env(safe-area-inset-right,0px));background:var(--c);color:var(--on)}
+.dayhead h2{margin:0;font-weight:500;font-size:17px;letter-spacing:-.01em}
+.dayhead .en{font-size:12px;letter-spacing:.12em;font-weight:500}
+.items{list-style:none;margin:0;padding:0}
+.item{display:grid;grid-template-columns:46px 28px 1fr;gap:10px;align-items:start;padding-block:13px;padding-left:18px;padding-right:max(18px,env(safe-area-inset-right,0px));border-bottom:1px solid var(--rule);cursor:pointer;transition:background .15s}
+.item:hover{background:rgba(211,209,166,.35)}
+.item.on{background:var(--sage)}
+.time{font-family:var(--f-en);font-weight:600;font-size:13px;letter-spacing:.04em;color:var(--ink-soft);padding-top:3px;font-variant-numeric:tabular-nums}
+.num{width:24px;height:24px;background:var(--c);color:var(--on);font-family:var(--f-en);font-weight:700;font-size:13px;display:grid;place-items:center;padding-top:2px}
+.num.ghost{background:transparent;color:var(--ink-soft);border:1px solid var(--rule);padding-top:2px}
+.txt{min-width:0}
+.title{font-weight:700;font-size:14.5px;letter-spacing:-.01em;color:var(--moss)}
+.sub{color:var(--ink-soft);font-size:12.5px;margin-top:1px}
+.alts{display:flex;flex-wrap:wrap;gap:4px;margin-top:7px}
+.alt{appearance:none;font:inherit;font-size:12px;padding:3px 9px;border:1px solid var(--rule);border-radius:0;background:var(--ivory);color:var(--moss);cursor:pointer}
+.alt.on{background:var(--c);border-color:var(--c);color:var(--on)}
+.note{margin-top:8px;font-size:12px;line-height:1.5;color:var(--maroon);display:grid;grid-template-columns:auto 1fr;gap:8px}
+.note::before{content:"CHECK";font-family:var(--f-en);font-weight:700;font-size:10px;letter-spacing:.12em;background:var(--neon);color:var(--moss);padding:3px 5px 1px;align-self:start}
+.foot{font-size:11.5px;color:var(--ink-soft);padding-block:18px 0;padding-left:18px;padding-right:max(18px,env(safe-area-inset-right,0px));line-height:1.6}
+
+/* map */
+.emd-l{background:none;border:0;box-shadow:none;padding:0;color:var(--moss);font:400 10.5px var(--f-ko);white-space:nowrap;opacity:.45}
+.emd-l::before{display:none}
+.emd-l.em{font:500 12px var(--f-ko);opacity:.55}
+.emd-l.peak{font:500 12px var(--f-ko);opacity:.6}
+#map:not(.z11) .emd-l.dong{display:none}
+#map.tiles-ok .emd-l{display:none}
+#map.tiles-ok .leaflet-overlay-pane path.emd{fill-opacity:0;stroke-opacity:0}
+.pin{width:30px;height:30px;background:var(--c);color:var(--on);display:grid;place-items:center;font:700 15px var(--f-en);padding-top:3px;position:relative;transition:transform .15s;transform-origin:50% 100%}
+.pin::after{content:"";position:absolute;left:50%;bottom:-6px;margin-left:-6px;border:6px solid transparent;border-bottom:0;border-top-color:var(--c)}
+.pin.big{transform:scale(1.3)}
+.pin.alt2{opacity:.6}
+.pin.home{background:var(--moss);color:var(--ivory);font-size:13px}
+.pin.home::after{border-top-color:var(--moss)}
+.leaflet-popup-content-wrapper{border-radius:0;background:var(--ivory);color:var(--moss);box-shadow:none;border:1px solid var(--moss)}
+.leaflet-popup-tip{background:var(--ivory);box-shadow:none;border:1px solid var(--moss)}
+.leaflet-popup-content{margin:12px 14px;font-family:var(--f-ko)}
+.pp-t{font-family:var(--f-en);font-weight:600;font-size:11px;letter-spacing:.1em;color:var(--ink-soft)}
+.pp-n{font-weight:800;font-size:16px;letter-spacing:-.02em;margin:2px 0 8px}
+.pp-l{display:flex;gap:12px;font-size:12px}
+.pp-l a{color:var(--maroon);text-decoration:none;border-bottom:1px solid currentColor}
+.leaflet-container{font-family:var(--f-ko)}
+.leaflet-bar a{border-radius:0!important;color:var(--moss);background:var(--ivory)}
+.leaflet-bar{border-radius:0;box-shadow:none!important;border:1px solid var(--moss)!important}
+
+@media (max-width:760px){
+  .app{grid-template-columns:1fr;grid-template-rows:40% 1fr}
+  .b-title h1{font-size:22px}
+  .b-title{gap:16px}
+    .brand>div,.dayhead,.item,.foot{padding-left:max(16px,env(safe-area-inset-left,0px))}
+  .tab{padding:10px 8px 11px}
+}
+@media (prefers-reduced-motion:reduce){.pin,.tab::before,.item{transition:none}}
+</style>
+
+<div class="app">
+  <main class="mapwrap">
+    <div id="map" role="application" aria-label="제주 일정 지도"></div>
+  </main>
+  <aside class="side">
+    <header class="brand">
+      <div class="b-title grain">
+        <div class="b-row"><span class="b-mark en">Jeju Babymoon</span><span class="b-date en">Oct 31 — Nov 02, 2026</span></div>
+        <h1>제주 2박 3일 태교여행</h1>
+      </div>
+    </header>
+    <nav class="tabs" aria-label="날짜 선택">
+      <button class="tab grain" id="tab-all" data-day="all" aria-pressed="true"><span class="en">All</span><small>전체 보기</small></button>
+      <button class="tab grain" id="tab-1" data-day="1" aria-pressed="false"><span class="en">Day 1</span><small>10.31 토</small></button>
+      <button class="tab grain" id="tab-2" data-day="2" aria-pressed="false"><span class="en">Day 2</span><small>11.1 일</small></button>
+      <button class="tab grain" id="tab-3" data-day="3" aria-pressed="false"><span class="en">Day 3</span><small>11.2 월</small></button>
+    </nav>
+    <div class="list" id="list"></div>
+  </aside>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.js"></script>
+<script>
+const EMD = {"type":"FeatureCollection","features":[{"type":"Feature","properties":{"n":"예래동","c":"gp","k":"dong"},"geometry":{"type":"Polygon","coordinates":[[[126.4508,33.3552],[126.4311,33.3147],[126.419,33.2382],[126.3703,33.2274],[126.3817,33.299],[126.4036,33.2898],[126.4255,33.3108],[126.4354,33.3365],[126.4508,33.3552]]]}},{"type":"Feature","properties":{"n":"중문동","c":"gp","k":"dong"},"geometry":{"type":"Polygon","coordinates":[[[126.5073,33.3544],[126.4767,33.3099],[126.4813,33.2841],[126.4586,33.2357],[126.419,33.2382],[126.4311,33.3147],[126.4508,33.3552],[126.5073,33.3544]]]}},{"type":"Feature","properties":{"n":"대천동","c":"gp","k":"dong"},"geometry":{"type":"Polygon","coordinates":[[[126.52,33.357],[126.5093,33.2803],[126.5073,33.2253],[126.4723,33.2192],[126.4586,33.2357],[126.4813,33.2841],[126.4767,33.3099],[126.5073,33.3544],[126.52,33.357]]]}},{"type":"Feature","properties":{"n":"대륜동","c":"gp","k":"dong"},"geometry":{"type":"Polygon","coordinates":[[[126.5515,33.2454],[126.5457,33.2346],[126.5073,33.2253],[126.5093,33.2803],[126.52,33.357],[126.5243,33.3579],[126.5219,33.3035],[126.5515,33.2454]]]}},{"type":"Feature","properties":{"n":"서홍동","c":"gp","k":"dong"},"geometry":{"type":"Polygon","coordinates":[[[126.5315,33.3583],[126.5368,33.3462],[126.5316,33.3153],[126.5469,33.3047],[126.563,33.2499],[126.5515,33.2454],[126.5219,33.3035],[126.5243,33.3579],[126.5315,33.3583]]]}},{"type":"Feature","properties":{"n":"동홍동","c":"gp","k":"dong"},"geometry":{"type":"Polygon","coordinates":[[[126.563,33.2499],[126.5469,33.3047],[126.5316,33.3153],[126.5368,33.3462],[126.58,33.2445],[126.5735,33.2419],[126.5722,33.2455],[126.563,33.2499]]]}},{"type":"Feature","properties":{"n":"영천동","c":"gp","k":"dong"},"geometry":{"type":"Polygon","coordinates":[[[126.5417,33.361],[126.5732,33.3459],[126.6017,33.3115],[126.6189,33.276],[126.5963,33.2527],[126.58,33.2445],[126.5368,33.3462],[126.5315,33.3583],[126.5417,33.361]]]}},{"type":"Feature","properties":{"n":"효돈동","c":"gp","k":"dong"},"geometry":{"type":"Polygon","coordinates":[[[126.5963,33.2527],[126.6189,33.276],[126.6262,33.2488],[126.6164,33.2374],[126.5963,33.2527]]]}},{"type":"Feature","properties":{"n":"천지동","c":"gp","k":"dong"},"geometry":{"type":"Polygon","coordinates":[[[126.5515,33.2454],[126.563,33.2499],[126.5639,33.2443],[126.5637,33.2403],[126.563,33.2385],[126.5457,33.2346],[126.5515,33.2454]]]}},{"type":"Feature","properties":{"n":"중앙동","c":"gp","k":"dong"},"geometry":{"type":"Polygon","coordinates":[[[126.563,33.2499],[126.5722,33.2455],[126.5639,33.2443],[126.563,33.2499]]]}},{"type":"Feature","properties":{"n":"정방동","c":"gp","k":"dong"},"geometry":{"type":"Polygon","coordinates":[[[126.5639,33.2443],[126.5722,33.2455],[126.5735,33.2419],[126.5637,33.2403],[126.5639,33.2443]]]}},{"type":"Feature","properties":{"n":"송산동","c":"gp","k":"dong"},"geometry":{"type":"Polygon","coordinates":[[[126.6164,33.2374],[126.563,33.2385],[126.5637,33.2403],[126.5735,33.2419],[126.58,33.2445],[126.5963,33.2527],[126.6164,33.2374]]]}},{"type":"Feature","properties":{"n":"표선면","c":"gp","k":"em"},"geometry":{"type":"Polygon","coordinates":[[[126.8073,33.4403],[126.8221,33.4233],[126.8079,33.3819],[126.8518,33.333],[126.8381,33.3054],[126.7776,33.3009],[126.7583,33.3364],[126.7262,33.3687],[126.67,33.3784],[126.654,33.3913],[126.6891,33.3969],[126.7078,33.4182],[126.7347,33.4221],[126.7595,33.415],[126.8073,33.4403]]]}},{"type":"Feature","properties":{"n":"안덕면","c":"gp","k":"em"},"geometry":{"type":"Polygon","coordinates":[[[126.4354,33.3365],[126.4255,33.3108],[126.4036,33.2898],[126.3817,33.299],[126.3703,33.2274],[126.3219,33.2348],[126.2972,33.216],[126.2944,33.2987],[126.283,33.305],[126.3018,33.3165],[126.3386,33.337],[126.3772,33.3435],[126.4354,33.3365]]]}},{"type":"Feature","properties":{"n":"성산읍","c":"gp","k":"em"},"geometry":{"type":"Polygon","coordinates":[[[126.8518,33.333],[126.8079,33.3819],[126.8221,33.4233],[126.8073,33.4403],[126.9053,33.4801],[126.9383,33.4706],[126.9102,33.4026],[126.9092,33.3879],[126.8754,33.3682],[126.8518,33.333]]]}},{"type":"Feature","properties":{"n":"남원읍","c":"gp","k":"em"},"geometry":{"type":"Polygon","coordinates":[[[126.654,33.3913],[126.67,33.3784],[126.7262,33.3687],[126.7583,33.3364],[126.7776,33.3009],[126.7474,33.2748],[126.694,33.2659],[126.6614,33.2676],[126.6262,33.2488],[126.6189,33.276],[126.6017,33.3115],[126.5732,33.3459],[126.5417,33.361],[126.5602,33.3678],[126.5831,33.368],[126.654,33.3913]]]}},{"type":"Feature","properties":{"n":"대정읍","c":"gp","k":"em"},"geometry":{"type":"Polygon","coordinates":[[[126.2972,33.216],[126.2736,33.1907],[126.2345,33.2312],[126.2018,33.2426],[126.1702,33.2783],[126.2037,33.2926],[126.2323,33.2805],[126.283,33.305],[126.2944,33.2987],[126.2972,33.216]]]}},{"type":"Feature","properties":{"n":"도두동","c":"si","k":"dong"},"geometry":{"type":"Polygon","coordinates":[[[126.4648,33.5001],[126.4858,33.5089],[126.4943,33.4906],[126.4796,33.4922],[126.4738,33.4889],[126.4648,33.5001]]]}},{"type":"Feature","properties":{"n":"이호동","c":"si","k":"dong"},"geometry":{"type":"Polygon","coordinates":[[[126.4491,33.4954],[126.4648,33.5001],[126.4738,33.4889],[126.4585,33.4812],[126.4491,33.4954]]]}},{"type":"Feature","properties":{"n":"외도동","c":"si","k":"dong"},"geometry":{"type":"Polygon","coordinates":[[[126.4218,33.4895],[126.4491,33.4954],[126.4585,33.4812],[126.4475,33.4653],[126.4218,33.4895]]]}},{"type":"Feature","properties":{"n":"노형동","c":"si","k":"dong"},"geometry":{"type":"Polygon","coordinates":[[[126.4738,33.4889],[126.4796,33.4922],[126.4884,33.4829],[126.4907,33.4338],[126.5024,33.4116],[126.5273,33.3708],[126.5262,33.3672],[126.5117,33.3798],[126.4613,33.3934],[126.452,33.4095],[126.4475,33.4653],[126.4585,33.4812],[126.4738,33.4889]]]}},{"type":"Feature","properties":{"n":"연동","c":"si","k":"dong"},"geometry":{"type":"Polygon","coordinates":[[[126.5015,33.4951],[126.5024,33.4116],[126.4907,33.4338],[126.4884,33.4829],[126.4796,33.4922],[126.4943,33.4906],[126.5015,33.4951]]]}},{"type":"Feature","properties":{"n":"오라동","c":"si","k":"dong"},"geometry":{"type":"Polygon","coordinates":[[[126.5176,33.4968],[126.5225,33.4947],[126.5217,33.4749],[126.5198,33.4487],[126.537,33.4242],[126.5399,33.3971],[126.5273,33.3708],[126.5024,33.4116],[126.5015,33.4951],[126.514,33.4969],[126.5176,33.4968]]]}},{"type":"Feature","properties":{"n":"아라동","c":"si","k":"dong"},"geometry":{"type":"Polygon","coordinates":[[[126.5839,33.4938],[126.5985,33.3997],[126.593,33.3877],[126.5602,33.3678],[126.5417,33.361],[126.5315,33.3583],[126.5262,33.3672],[126.5273,33.3708],[126.5399,33.3971],[126.537,33.4242],[126.5198,33.4487],[126.5217,33.4749],[126.5541,33.487],[126.5831,33.4943],[126.5839,33.4938]]]}},{"type":"Feature","properties":{"n":"봉개동","c":"si","k":"dong"},"geometry":{"type":"Polygon","coordinates":[[[126.6139,33.5137],[126.6432,33.4593],[126.644,33.4247],[126.6144,33.3956],[126.593,33.3877],[126.5985,33.3997],[126.5839,33.4938],[126.6139,33.5137]]]}},{"type":"Feature","properties":{"n":"삼양동","c":"si","k":"dong"},"geometry":{"type":"Polygon","coordinates":[[[126.5755,33.5225],[126.6052,33.532],[126.6139,33.5137],[126.5839,33.4938],[126.5831,33.4943],[126.5755,33.5225]]]}},{"type":"Feature","properties":{"n":"화북동","c":"si","k":"dong"},"geometry":{"type":"Polygon","coordinates":[[[126.5755,33.5225],[126.5831,33.4943],[126.5541,33.487],[126.5548,33.4941],[126.557,33.5008],[126.5509,33.5176],[126.5755,33.5225]]]}},{"type":"Feature","properties":{"n":"건입동","c":"si","k":"dong"},"geometry":{"type":"Polygon","coordinates":[[[126.5267,33.5157],[126.5509,33.5176],[126.557,33.5008],[126.534,33.51],[126.5263,33.5127],[126.5267,33.5157]]]}},{"type":"Feature","properties":{"n":"용담2동","c":"si","k":"dong"},"geometry":{"type":"Polygon","coordinates":[[[126.4858,33.5089],[126.5162,33.5133],[126.514,33.4969],[126.5015,33.4951],[126.4943,33.4906],[126.4858,33.5089]]]}},{"type":"Feature","properties":{"n":"용담1동","c":"si","k":"dong"},"geometry":{"type":"Polygon","coordinates":[[[126.5162,33.5133],[126.5178,33.5154],[126.5218,33.5073],[126.5176,33.4968],[126.514,33.4969],[126.5162,33.5133]]]}},{"type":"Feature","properties":{"n":"삼도2동","c":"si","k":"dong"},"geometry":{"type":"Polygon","coordinates":[[[126.5178,33.5154],[126.5267,33.5157],[126.5263,33.5127],[126.5255,33.5093],[126.5267,33.5011],[126.5218,33.5073],[126.5178,33.5154]]]}},{"type":"Feature","properties":{"n":"삼도1동","c":"si","k":"dong"},"geometry":{"type":"Polygon","coordinates":[[[126.5218,33.5073],[126.5267,33.5011],[126.5275,33.4969],[126.5225,33.4947],[126.5176,33.4968],[126.5218,33.5073]]]}},{"type":"Feature","properties":{"n":"이도2동","c":"si","k":"dong"},"geometry":{"type":"Polygon","coordinates":[[[126.5368,33.5],[126.5548,33.4941],[126.5541,33.487],[126.5217,33.4749],[126.5225,33.4947],[126.5275,33.4969],[126.5368,33.5]]]}},{"type":"Feature","properties":{"n":"이도1동","c":"si","k":"dong"},"geometry":{"type":"Polygon","coordinates":[[[126.5291,33.5067],[126.5368,33.5],[126.5275,33.4969],[126.5267,33.5011],[126.5255,33.5093],[126.5291,33.5067]]]}},{"type":"Feature","properties":{"n":"일도2동","c":"si","k":"dong"},"geometry":{"type":"Polygon","coordinates":[[[126.534,33.51],[126.557,33.5008],[126.5548,33.4941],[126.5368,33.5],[126.5291,33.5067],[126.534,33.51]]]}},{"type":"Feature","properties":{"n":"일도1동","c":"si","k":"dong"},"geometry":{"type":"Polygon","coordinates":[[[126.5263,33.5127],[126.534,33.51],[126.5291,33.5067],[126.5255,33.5093],[126.5263,33.5127]]]}},{"type":"Feature","properties":{"n":"우도면","c":"si","k":"em"},"geometry":{"type":"Polygon","coordinates":[[[126.9575,33.5225],[126.9732,33.4988],[126.9428,33.501],[126.9575,33.5225]]]}},{"type":"Feature","properties":{"n":"한경면","c":"si","k":"em"},"geometry":{"type":"Polygon","coordinates":[[[126.3018,33.3165],[126.283,33.305],[126.2323,33.2805],[126.2037,33.2926],[126.1702,33.2783],[126.1632,33.3206],[126.1693,33.3431],[126.2141,33.373],[126.2415,33.3402],[126.2661,33.3402],[126.3018,33.3165]]]}},{"type":"Feature","properties":{"n":"조천읍","c":"si","k":"em"},"geometry":{"type":"Polygon","coordinates":[[[126.7073,33.5508],[126.7094,33.5306],[126.7334,33.5017],[126.7222,33.4481],[126.7347,33.4221],[126.7078,33.4182],[126.6891,33.3969],[126.654,33.3913],[126.5831,33.368],[126.5602,33.3678],[126.593,33.3877],[126.6144,33.3956],[126.644,33.4247],[126.6432,33.4593],[126.6139,33.5137],[126.6052,33.532],[126.6601,33.5489],[126.7073,33.5508]]]}},{"type":"Feature","properties":{"n":"구좌읍","c":"si","k":"em"},"geometry":{"type":"Polygon","coordinates":[[[126.9053,33.4801],[126.8073,33.4403],[126.7595,33.415],[126.7347,33.4221],[126.7222,33.4481],[126.7334,33.5017],[126.7094,33.5306],[126.7073,33.5508],[126.7866,33.5629],[126.8331,33.543],[126.8596,33.5237],[126.9045,33.5231],[126.918,33.4983],[126.9053,33.4801]]]}},{"type":"Feature","properties":{"n":"애월읍","c":"si","k":"em"},"geometry":{"type":"Polygon","coordinates":[[[126.4475,33.4653],[126.452,33.4095],[126.4613,33.3934],[126.5117,33.3798],[126.5262,33.3672],[126.5315,33.3583],[126.5243,33.3579],[126.52,33.357],[126.5073,33.3544],[126.4508,33.3552],[126.4354,33.3365],[126.3772,33.3435],[126.3369,33.3627],[126.312,33.3952],[126.2984,33.4443],[126.3101,33.4631],[126.3375,33.4637],[126.3876,33.4865],[126.4218,33.4895],[126.4475,33.4653]]]}},{"type":"Feature","properties":{"n":"한림읍","c":"si","k":"em"},"geometry":{"type":"Polygon","coordinates":[[[126.2984,33.4443],[126.312,33.3952],[126.3369,33.3627],[126.3772,33.3435],[126.3386,33.337],[126.3018,33.3165],[126.2661,33.3402],[126.2415,33.3402],[126.2141,33.373],[126.2619,33.4137],[126.262,33.4314],[126.2984,33.4443]]]}}]};
+const P = {
+  sk:["SK렌터카 제주 (공항)",33.50405,126.50103],
+  kmb:["제주김만복김밥 본점",33.49706,126.50888],
+  jjs:["카페진정성",33.50247,126.46294],
+  iho:["이호테우해변",33.49794,126.45316],
+  abb:["아베베 베이커리 제주",33.51266,126.52880],
+  ljm:["이재모피자 제주점",33.48520,126.54349],
+  pn:["파르나스 호텔 제주",33.24460,126.40596],
+  sbs:["산방산",33.24107,126.31345],
+  ymr:["용머리해안",33.23162,126.31483],
+  dol:["대정 노을해안로 돌고래 포인트",33.24360,126.21667],
+  hd:["애월 한담해변",33.46161,126.31052],
+  ssd:["숙성도 애월점",33.46352,126.30965],
+  brs:["보름숲",33.26928,126.44695],
+  luc:["카페 루시아",33.23509,126.36307],
+  wie:["위이 wiee",33.31279,126.35915],
+  bj:["방주교회",33.30513,126.38726],
+  efc:["이에프쿠치나 (2F Cucina)",33.40023,126.24946],
+  hj:["협재해수욕장",33.39429,126.23988],
+  sgb:["산굼부리",33.43303,126.69066],
+  uj:["운정이네 (중문)",33.26373,126.43751],
+  gsr:["가시림",33.36103,126.75169],
+  bt:["카페 밭디",33.40786,126.77262],
+  hms:["해맞이쉼터",33.53722,126.83780],
+  bjr:["비자림",33.48427,126.80648],
+  he:["하음 (젤라또)",33.49597,126.81118],
+  hdk:["함덕해수욕장",33.54342,126.66978],
+  cju:["제주국제공항",33.50708,126.49343]
+};
+const DAYS = [
+ {d:1,label:"첫째 날",date:"10.31 SAT",items:[
+  {t:"07:45",title:"제주 도착, 렌터카 찾기",p:["sk"]},
+  {t:"08:30",title:"아침",p:["kmb"]},
+  {t:"10:00",title:"카페진정성, 이호테우해변 구경",p:["jjs","iho"]},
+  {t:"12:00",title:"아베베 베이커리 (포장)",p:["abb"]},
+  {t:"12:30",title:"점심",p:["ljm"],note:"Google 지도 기준 일요일 휴무, 토요일 영업."},
+  {t:"14:30",title:"체크인, 호텔 구경 & 휴식",sub:"낮잠?",p:["pn"]},
+  {t:"17:00",title:"산방산 & 용머리해안 스치고 가기",p:["sbs","ymr"],note:"용머리해안 산책로는 물때·기상에 따라 개방 시간이 매일 달라집니다. 들어가려면 당일 개방 여부 확인."},
+  {t:"17:30",title:"대정읍 해안도로 돌고래 스팟",p:["dol"]},
+  {t:"18:00",title:"애월 해변 구경",p:["hd"]},
+  {t:"18:30",title:"저녁",sub:"숙성도는 예약하기!",p:["ssd","brs"],alt:true,note:"보름숲은 중문 쪽(호텔 근처)이라 애월에서 약 40km 거리입니다."},
+  {t:"20:00",title:"귀가",p:["pn"],ghost:true}
+ ]},
+ {d:2,label:"둘째 날",date:"11.01 SUN",items:[
+  {t:"09:00",title:"출발",p:["pn"],ghost:true},
+  {t:"09:30",title:"아침",p:["luc","wie"],alt:true,note:"Google 지도 기준 위이 오픈 10:00 · 카페 루시아 09:30."},
+  {t:"11:00",title:"방주교회 예배",p:["bj"]},
+  {t:"13:00",title:"점심",sub:"예약 완료",p:["efc"]},
+  {t:"14:30",title:"협재해수욕장 구경",p:["hj"]},
+  {t:"16:00",title:"산굼부리",p:["sgb"],note:"협재에서 산굼부리는 섬 서쪽 끝에서 동쪽 중산간까지 이동입니다. 운영 09:00–18:00(Google 지도)."},
+  {t:"18:00",title:"저녁 (갈치조림)",p:["uj"]}
+ ]},
+ {d:3,label:"셋째 날",date:"11.02 MON",items:[
+  {t:"AM",title:"호텔에서 쉬기",sub:"조식이나 따로 아침 사서 먹기",p:["pn"],ghost:true},
+  {t:"11:00",title:"체크아웃",p:["pn"],ghost:true},
+  {t:"12:00",title:"카페",p:["gsr","bt"],alt:true,note:"Google 지도 기준 밭디는 수요일 휴무(월요일 영업)."},
+  {t:"13:30",title:"점심 (해물라면)",p:["hms"]},
+  {t:"15:00",title:"비자림, 하음 (젤라또)",p:["bjr","he"],note:"하음 영업시간은 Google 지도 정보가 불완전합니다. 방문 전 확인."},
+  {t:"16:00",title:"함덕해수욕장, 이른 저녁",p:["hdk"]},
+  {t:"17:30",title:"렌터카 반납",p:["sk"]},
+  {t:"18:50",title:"비행기 탑승",p:["cju"]}
+ ]}
+];
+
+const css = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+const col = d => ({c:css("--d"+d), on:css("--d"+d+"-on")});
+
+const map = L.map("map",{zoomControl:true}).setView([33.38,126.55],10);
+const mapEl=document.getElementById("map");
+// Basemap drawn locally: 읍·면·동 boundaries + names (KOSTAT 2013), so place names read even where OSM tiles can't load
+const emdLayer=L.geoJSON(EMD,{interactive:false,style:f=>({className:"emd",color:css("--olive"),opacity:.35,weight:f.properties.k==="em"?1:.5,fillColor:f.properties.c==="si"?"#DEDCB6":css("--sage"),fillOpacity:1})}).addTo(map);
+const labels=L.layerGroup().addTo(map);
+emdLayer.eachLayer(l=>{const p=l.feature.properties;
+  L.tooltip({permanent:true,direction:"center",className:"emd-l "+p.k,interactive:false}).setLatLng(l.getBounds().getCenter()).setContent(p.n).addTo(labels);});
+L.tooltip({permanent:true,direction:"center",className:"emd-l peak",interactive:false}).setLatLng([33.3617,126.5292]).setContent("▲ 한라산").addTo(labels);
+const zoomCls=()=>mapEl.classList.toggle("z11",map.getZoom()>=11);
+map.on("zoomend",zoomCls); zoomCls();
+map.attributionControl.addAttribution('경계: 통계청 2013 (southkorea-maps)');
+// Add OSM tiles only after a probe tile really loads; where external images are blocked the drawn map stays as-is.
+(function(){const probe=new Image(); probe.referrerPolicy="strict-origin-when-cross-origin";
+  probe.onload=()=>{ if(probe.naturalWidth<2) return;
+    L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png",{maxZoom:19,referrerPolicy:"strict-origin-when-cross-origin",attribution:'&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'}).addTo(map);
+    mapEl.classList.add("tiles-ok"); };
+  probe.src="https://tile.openstreetmap.org/10/873/403.png";})();
+
+let current="all", lastBounds=null, userMoved=false;
+const layer = L.layerGroup().addTo(map);
+const markers = {};
+
+function icon(d,label,cls){
+  const k=col(d);
+  return L.divIcon({className:"",html:`<div class="pin ${cls||""}" style="--c:${k.c};--on:${k.on}">${label}</div>`,iconSize:[30,30],iconAnchor:[15,36],popupAnchor:[0,-34]});
+}
+function fit(){ if(!lastBounds) return; const s=map.getSize(); if(s.x<50||s.y<50) return; map.fitBounds(lastBounds,{padding:[48,48],animate:false}); }
+// The viewer may mount the page at zero size first; re-measure and refit once the map has real dimensions.
+let lastW=0,lastH=0;
+new ResizeObserver(()=>{const w=mapEl.clientWidth,h=mapEl.clientHeight; if(w===lastW&&h===lastH) return; const was0=lastW<50||lastH<50; lastW=w;lastH=h; map.invalidateSize(false); if(was0||!userMoved) fit();}).observe(mapEl);
+mapEl.addEventListener('pointerdown',()=>{userMoved=true}); mapEl.addEventListener('wheel',()=>{userMoved=true},{passive:true});
+function popupHtml(t,key){
+  const [n,lat,lng]=P[key];
+  const osm=`https://www.openstreetmap.org/?mlat=${lat}&mlon=${lng}#map=17/${lat}/${lng}`;
+  const nv=`https://map.naver.com/p/search/${encodeURIComponent(n.replace(/\s*\(.*\)/,""))}`;
+  return `<div class="pp-t">${t}</div><div class="pp-n">${n}</div><div class="pp-l"><a href="${osm}" target="_blank" rel="noopener">OpenStreetMap ↗</a><a href="${nv}" target="_blank" rel="noopener">네이버 지도 ↗</a></div>`;
+}
+
+function render(){
+  layer.clearLayers(); Object.keys(markers).forEach(k=>delete markers[k]);
+  const days = current==="all"?DAYS:DAYS.filter(x=>String(x.d)===current);
+  const bounds=[P.pn.slice(1)];
+  days.forEach(day=>{
+    const route=[]; let n=0;
+    day.items.forEach((it,i)=>{
+      if(it.ghost){ route.push(P.pn.slice(1)); return; }
+      n++; it._n=n;
+      it.p.forEach((k,j)=>{
+        const ll=P[k].slice(1);
+        const m=L.marker(ll,{icon:icon(day.d,n,it.alt&&j>0?"alt2":""),title:P[k][0],riseOnHover:true})
+          .bindPopup(popupHtml(`DAY ${day.d} · ${it.t}`,k)).on("click",()=>select(day.d,i,j,false));
+        m.addTo(layer); markers[`${day.d}-${i}-${j}`]=m; bounds.push(ll);
+        if(!it.alt||j===0) route.push(ll);
+      });
+    });
+    L.polyline(route,{color:col(day.d).c,weight:2,opacity:.85,dashArray:"2 7",lineCap:"square"}).addTo(layer);
+  });
+  L.marker(P.pn.slice(1),{icon:L.divIcon({className:"",html:`<div class="pin home">H</div>`,iconSize:[30,30],iconAnchor:[15,36],popupAnchor:[0,-34]}),zIndexOffset:-100})
+    .bindPopup(popupHtml("STAY","pn")).addTo(layer);
+  lastBounds=bounds; userMoved=false; fit();
+  renderList(days);
+}
+
+const tag={1:"Day 1",2:"Day 2",3:"Day 3"};
+function renderList(days){
+  document.getElementById("list").innerHTML = days.map(day=>`
+    <section class="day" style="--c:var(--d${day.d});--on:var(--d${day.d}-on)">
+      <div class="dayhead grain"><h2>${day.label}</h2><span class="en">${tag[day.d]} · ${day.date}</span></div>
+      <ul class="items">${day.items.map((it,i)=>{
+        const alts = it.p.length>1 ? `<div class="alts">${it.p.map((k,j)=>`<button class="alt" id="alt-${day.d}-${i}-${j}" data-d="${day.d}" data-i="${i}" data-j="${j}">${it.alt&&j>0?"or ":""}${P[k][0]}</button>`).join("")}</div>`:"";
+        const sub = it.p.length===1 && !it.ghost ? P[it.p[0]][0] + (it.sub?` · ${it.sub}`:"") : (it.sub||"");
+        return `<li class="item" tabindex="0" id="item-${day.d}-${i}" data-d="${day.d}" data-i="${i}">
+          <span class="time">${it.t}</span>
+          <span class="num ${it.ghost?"ghost":""}">${it.ghost?"H":it._n}</span>
+          <div class="txt"><div class="title">${it.title}</div>${sub?`<div class="sub">${sub}</div>`:""}${alts}${it.note?`<div class="note"><span>${it.note}</span></div>`:""}</div>
+        </li>`;}).join("")}</ul>
+    </section>`).join("") +
+    `<p class="foot">좌표와 영업시간 메모는 2026년 10월 27일 Google 지도 검색 결과 기준이며 바뀔 수 있습니다. 읍·면·동 경계와 이름은 통계청 2013년 자료(southkorea-maps) 기준입니다. 지도 © OpenStreetMap contributors.</p>`;
+}
+
+function select(d,i,j,fly=true){
+  const it=DAYS.find(x=>x.d===d).items[i];
+  document.querySelectorAll(".item.on,.alt.on").forEach(e=>e.classList.remove("on"));
+  document.querySelectorAll(".pin.big").forEach(e=>e.classList.remove("big"));
+  const li=document.getElementById(`item-${d}-${i}`); if(li){li.classList.add("on"); li.scrollIntoView({block:"nearest",behavior:"smooth"});}
+  const a=document.getElementById(`alt-${d}-${i}-${j}`); if(a) a.classList.add("on");
+  if(it.ghost){ map.flyTo(P.pn.slice(1),13,{duration:.6}); return; }
+  const m=markers[`${d}-${i}-${j}`]; if(!m) return;
+  if(fly) map.flyTo(m.getLatLng(),14,{duration:.7});
+  setTimeout(()=>{ m.openPopup(); const el=m.getElement()?.querySelector(".pin"); el&&el.classList.add("big"); }, fly?720:0);
+}
+
+document.querySelector(".tabs").addEventListener("click",e=>{
+  const b=e.target.closest(".tab"); if(!b) return;
+  current=b.dataset.day;
+  document.querySelectorAll(".tab").forEach(t=>t.setAttribute("aria-pressed",t===b));
+  map.closePopup(); render();
+  try{localStorage.setItem("jeju-day",current)}catch(_){}
+});
+document.getElementById("list").addEventListener("click",e=>{
+  const a=e.target.closest(".alt");
+  if(a){ e.stopPropagation(); select(+a.dataset.d,+a.dataset.i,+a.dataset.j); return; }
+  const li=e.target.closest(".item"); if(li) select(+li.dataset.d,+li.dataset.i,0);
+});
+document.getElementById("list").addEventListener("keydown",e=>{
+  if((e.key==="Enter"||e.key===" ")&&e.target.classList.contains("item")){e.preventDefault(); select(+e.target.dataset.d,+e.target.dataset.i,0);}
+});
+try{const s=localStorage.getItem("jeju-day"); if(s){current=s; document.querySelectorAll(".tab").forEach(t=>t.setAttribute("aria-pressed",t.dataset.day===s));}}catch(_){}
+render();
+</script>
+
+</body>
+</html>

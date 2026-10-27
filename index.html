@@ -716,7 +716,7 @@ body{background:var(--ivory);color:var(--ink);font-family:var(--f-ko);font-size:
 .tab[aria-pressed="false"]{opacity:.62}
 .tab[aria-pressed="false"]:hover{opacity:1;filter:none}
 .tab:focus-visible,.item:focus-visible,.alt:focus-visible{outline:2px solid var(--moss);outline-offset:-2px}
-#tab-all{--bg:var(--olive);--fg:var(--moss)}
+#tab-all{--bg:var(--olive);--fg:var(--ivory)}
 #tab-1{--bg:var(--d1);--fg:var(--d1-on)}
 #tab-2{--bg:var(--pink);--fg:#3A0A0A}
 #tab-3{--bg:var(--sky);--fg:var(--moss)}
@@ -764,8 +764,12 @@ body{background:var(--ivory);color:var(--ink);font-family:var(--f-ko);font-size:
 .pp-l{display:flex;gap:12px;font-size:12px}
 .pp-l a{color:var(--maroon);text-decoration:none;border-bottom:1px solid currentColor}
 .leaflet-container{font-family:var(--f-ko)}
-.leaflet-bar a{border-radius:0!important;color:var(--moss);background:var(--ivory)}
-.leaflet-bar{border-radius:0;box-shadow:none!important;border:1px solid var(--moss)!important}
+.leaflet-bar{border:0!important;border-radius:0;box-shadow:none!important}
+.leaflet-bar a,.leaflet-bar a:hover{border:0!important;border-radius:0!important;background:var(--olive);color:var(--ivory);width:34px;height:34px;line-height:34px;font-size:20px}
+.leaflet-bar a:hover{filter:brightness(1.06)}
+.leaflet-bar a+a{margin-top:2px}
+.leaflet-bottom.leaflet-left{margin-left:env(safe-area-inset-left,0px);margin-bottom:env(safe-area-inset-bottom,0px)}
+.leaflet-bottom.leaflet-left .leaflet-control{margin:0 0 16px 16px}
 
 @media (max-width:760px){
   .app{grid-template-columns:1fr;grid-template-rows:40% 1fr}
@@ -888,7 +892,8 @@ const DAYS = [
 const css = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
 const col = d => ({c:css("--d"+d), on:css("--d"+d+"-on")});
 
-const map = L.map("map",{zoomControl:true}).setView([33.38,126.55],10);
+const map = L.map("map",{zoomControl:false,attributionControl:false}).setView([33.38,126.55],10);
+L.control.zoom({position:"bottomleft"}).addTo(map);
 const mapEl=document.getElementById("map");
 // Basemap drawn locally: 읍·면·동 boundaries + names (KOSTAT 2013), so place names read even where OSM tiles can't load
 const emdLayer=L.geoJSON(EMD,{interactive:false,style:f=>({className:"emd",color:css("--olive"),opacity:.35,weight:f.properties.k==="em"?1:.5,fillColor:f.properties.c==="si"?"#DEDCB6":css("--sage"),fillOpacity:1})}).addTo(map);
@@ -898,7 +903,6 @@ emdLayer.eachLayer(l=>{const p=l.feature.properties;
 L.tooltip({permanent:true,direction:"center",className:"emd-l peak",interactive:false}).setLatLng([33.3617,126.5292]).setContent("▲ 한라산").addTo(labels);
 const zoomCls=()=>mapEl.classList.toggle("z11",map.getZoom()>=11);
 map.on("zoomend",zoomCls); zoomCls();
-map.attributionControl.addAttribution('경계: 통계청 2013 (southkorea-maps)');
 
 let current="all", lastBounds=null, userMoved=false;
 const layer = L.layerGroup().addTo(map);

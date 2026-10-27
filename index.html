@@ -919,9 +919,11 @@ new ResizeObserver(()=>{const w=mapEl.clientWidth,h=mapEl.clientHeight; if(w===l
 mapEl.addEventListener('pointerdown',()=>{userMoved=true}); mapEl.addEventListener('wheel',()=>{userMoved=true},{passive:true});
 function popupHtml(t,key){
   const [n,lat,lng]=P[key];
-  const osm=`https://www.openstreetmap.org/?mlat=${lat}&mlon=${lng}#map=17/${lat}/${lng}`;
+  const nm=n.replace(/\s*\(.*\)/,"");
+  // TMAP app route link (rGoX = longitude, rGoY = latitude); opens only on a phone with TMAP installed
+  const tm=`tmap://route?rGoName=${encodeURIComponent(nm)}&rGoX=${lng}&rGoY=${lat}`;
   const nv=`https://map.naver.com/p/search/${encodeURIComponent(n.replace(/\s*\(.*\)/,""))}`;
-  return `<div class="pp-t">${t}</div><div class="pp-n">${n}</div><div class="pp-l"><a href="${osm}" target="_blank" rel="noopener">OpenStreetMap ↗</a><a href="${nv}" target="_blank" rel="noopener">네이버 지도 ↗</a></div>`;
+  return `<div class="pp-t">${t}</div><div class="pp-n">${n}</div><div class="pp-l"><a href="${tm}">티맵 길안내 ↗</a><a href="${nv}" target="_blank" rel="noopener">네이버 지도 ↗</a></div>`;
 }
 
 function render(){

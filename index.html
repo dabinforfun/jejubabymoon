@@ -4,9 +4,9 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta property="og:type" content="website">
-<meta property="og:title" content="제주 2박 3일 태교여행">
-<meta property="og:description" content="10.31 – 11.2 · 일정표와 지도">
-<meta property="og:image" content="https://dabinforfun.github.io/jejubabymoon/og-image.png?v=3">
+<meta property="og:title" content="Babymoon in Jeju">
+<meta property="og:description" content="제주 2박 3일 태교여행 · 10.31 – 11.2 일정표와 지도">
+<meta property="og:image" content="https://dabinforfun.github.io/jejubabymoon/og-image.png?v=6">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="600">
 <meta name="twitter:card" content="summary_large_image">
@@ -685,7 +685,7 @@ svg.leaflet-image-layer.leaflet-interactive path {
 :root{
   --ivory:#FFFCF2; --pink:#D38FB5; --neon:#EAFF3D; --olive:#AA9D58; --moss:#3A3408; --sky:#A8C8FF; --maroon:#560000; --sage:#D3D1A6;
   --ink:#3A3408; --ink-soft:#6B6232; --rule:rgba(58,52,8,.16);
-  --d1:#560000; --d1-on:#FFFCF2;
+  --d1:#64231F; --d1-on:#FFFCF2;
   --d2:#D38FB5; --d2-on:#3A0A0A;
   --d3:#A8C8FF; --d3-on:#3A3408;
   --f-ko:"Gothic A1","Apple SD Gothic Neo","Malgun Gothic",sans-serif;
@@ -708,11 +708,11 @@ body{background:var(--ivory);color:var(--ink);font-family:var(--f-ko);font-size:
 /* brand block */
 .brand{display:grid;grid-template-columns:1fr;border-bottom:1px solid var(--rule)}
 .brand>div{padding:16px 18px;min-width:0}
-.b-title{background:var(--ivory);display:flex;flex-direction:column;justify-content:space-between;gap:28px;padding-block:20px 22px!important;padding-right:max(18px,env(safe-area-inset-right,0px))!important}
+.b-title{background:var(--ivory);display:flex;flex-direction:column;justify-content:space-between;gap:28px;padding-block:20px 48px!important;padding-right:max(18px,env(safe-area-inset-right,0px))!important}
 .b-row{display:flex;justify-content:space-between;align-items:baseline;gap:12px;flex-wrap:wrap}
-.b-mark{font-size:14px;font-weight:700;letter-spacing:.16em;color:var(--maroon)}
+.b-ko{font-size:13px;font-weight:400;letter-spacing:.01em;color:var(--ink-soft)}
 .b-date{font-size:11px;color:var(--ink-soft)}
-.b-title h1{margin:0;font-family:var(--f-ko);font-weight:800;font-size:28px;line-height:1.25;letter-spacing:-.03em;color:var(--moss);text-wrap:balance;word-break:keep-all}
+.b-title h1{margin:0;font-family:var(--f-en);font-weight:600;font-size:40px;line-height:1.05;letter-spacing:.01em;color:var(--maroon);text-wrap:balance}
 
 /* tabs as swatches */
 .tabs{display:grid;grid-template-columns:repeat(4,1fr)}
@@ -752,10 +752,10 @@ body{background:var(--ivory);color:var(--ink);font-family:var(--f-ko);font-size:
 .foot{font-size:11.5px;color:var(--ink-soft);padding-block:18px 0;padding-left:18px;padding-right:max(18px,env(safe-area-inset-right,0px));line-height:1.6}
 
 /* map */
-.emd-l{background:none;border:0;box-shadow:none;padding:0;color:var(--moss);font:400 10.5px var(--f-ko);white-space:nowrap;opacity:.45}
+.emd-l{background:none;border:0;box-shadow:none;padding:0;color:var(--moss);font:400 9.5px var(--f-ko);white-space:nowrap;opacity:.32}
 .emd-l::before{display:none}
-.emd-l.em{font:500 12px var(--f-ko);opacity:.55}
-.emd-l.peak{font:500 12px var(--f-ko);opacity:.6}
+.emd-l.em{font:500 10.5px var(--f-ko);opacity:.4}
+.emd-l.peak{font:500 10.5px var(--f-ko);opacity:.45}
 #map:not(.z11) .emd-l.dong{display:none}
 .pin{width:30px;height:30px;background:var(--c);color:var(--on);display:grid;place-items:center;font:700 15px var(--f-en);padding-top:3px;position:relative;transition:transform .15s;transform-origin:50% 100%}
 .pin::after{content:"";position:absolute;left:50%;bottom:-6px;margin-left:-6px;border:6px solid transparent;border-bottom:0;border-top-color:var(--c)}
@@ -780,7 +780,7 @@ body{background:var(--ivory);color:var(--ink);font-family:var(--f-ko);font-size:
 
 @media (max-width:760px){
   .app{grid-template-columns:1fr;grid-template-rows:40% 1fr}
-  .b-title h1{font-size:22px}
+  .b-title h1{font-size:32px}
   .b-title{gap:16px}
     .brand>div,.dayhead,.item,.foot{padding-left:max(16px,env(safe-area-inset-left,0px))}
   .tab{padding:10px 8px 11px}
@@ -806,6 +806,14 @@ body{background:var(--ivory);color:var(--ink);font-family:var(--f-ko);font-size:
 @keyframes pulse{0%,100%{box-shadow:0 0 0 3px var(--neon)}50%{box-shadow:0 0 0 6px rgba(234,255,61,.35)}}
 .item.is-now .num{animation:pulse 1.8s ease-in-out infinite}
 @media (prefers-reduced-motion:reduce){.pin,.item,.route,.tab,.item.is-now .num,.spot{animation:none!important;transition:none!important}}
+/* phone: the whole right panel scrolls, title scrolls away, tabs stick to the top */
+@media (max-width:760px){
+  .side{overflow-y:auto;overscroll-behavior:contain}
+  .list{flex:none;overflow:visible}
+  .tabs{position:sticky;top:0;z-index:5;background:var(--ivory)}
+  .dayhead{top:calc(var(--tabs-h,58px) - 1px)}
+  .item{scroll-margin-top:calc(var(--tabs-h,58px) + 52px)}
+}
 </style>
 
 <div class="app">
@@ -815,8 +823,8 @@ body{background:var(--ivory);color:var(--ink);font-family:var(--f-ko);font-size:
   <aside class="side">
     <header class="brand">
       <div class="b-title grain">
-        <div class="b-row"><span class="b-mark en">Jeju Babymoon</span><span class="b-date en">Oct 31 — Nov 02, 2026</span></div>
-        <h1>제주 2박 3일 태교여행</h1>
+        <div class="b-row"><span class="b-ko">제주 2박 3일 태교여행</span><span class="b-date en">Oct 31 — Nov 02, 2026</span></div>
+        <h1>Babymoon in Jeju</h1>
       </div>
     </header>
     <nav class="tabs" aria-label="날짜 선택">
@@ -1018,6 +1026,8 @@ setInterval(markNow,60000);
 document.getElementById("list").addEventListener("keydown",e=>{
   if((e.key==="Enter"||e.key===" ")&&e.target.classList.contains("item")){e.preventDefault(); select(+e.target.dataset.d,+e.target.dataset.i,0);}
 });
+{const tabsEl=document.querySelector(".tabs"), side=document.querySelector(".side");
+ new ResizeObserver(()=>side.style.setProperty("--tabs-h",tabsEl.getBoundingClientRect().height+"px")).observe(tabsEl);}
 try{const s=localStorage.getItem("jeju-day"); if(s) current=s;}catch(_){}
 {const n=kstNow(); const d=Object.keys(TRIP).find(k=>TRIP[k]===n.date); if(d) current=d;}
 document.querySelectorAll(".tab").forEach(t=>t.setAttribute("aria-pressed",t.dataset.day===current));

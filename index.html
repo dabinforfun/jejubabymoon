@@ -715,13 +715,13 @@ body{background:var(--ivory);color:var(--ink);font-family:var(--f-ko);font-size:
 .b-title h1{margin:0;font-family:var(--f-en);font-weight:600;font-size:40px;line-height:1.05;letter-spacing:.01em;color:var(--maroon);text-wrap:balance}
 
 /* tabs as swatches */
-.tabs{display:grid;grid-template-columns:repeat(4,1fr)}
+.tabs{display:grid;grid-template-columns:repeat(4,1fr);position:relative;z-index:4}
 .tab{appearance:none;border:0;border-radius:0;font:inherit;cursor:pointer;text-align:left;padding:12px 12px 11px;display:flex;flex-direction:column;gap:2px;min-width:0;background:var(--bg);color:var(--fg);position:relative}
 .tab .en{font-size:12px;letter-spacing:.1em}
 .tab small{font-size:11px;opacity:.8;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.tab{transition:filter .25s,opacity .25s}
-.tab[aria-pressed="false"]{opacity:.62}
-.tab[aria-pressed="false"]:hover{opacity:1;filter:none}
+.tab{transition:background-color .25s,color .25s}
+.tab[aria-pressed="false"]{background:color-mix(in srgb,var(--bg) 62%,var(--ivory));color:color-mix(in srgb,var(--fg) 62%,var(--ivory))}
+.tab[aria-pressed="false"]:hover{background:var(--bg);color:var(--fg)}
 .tab:focus-visible,.item:focus-visible,.alt:focus-visible{outline:2px solid var(--moss);outline-offset:-2px}
 #tab-all{--bg:var(--olive);--fg:var(--ivory)}
 #tab-1{--bg:var(--d1);--fg:var(--d1-on)}
@@ -731,7 +731,7 @@ body{background:var(--ivory);color:var(--ink);font-family:var(--f-ko);font-size:
 /* itinerary */
 .list{flex:1;overflow-y:auto;padding-bottom:28px}
 .day+.day{margin-top:4px}
-.dayhead{display:flex;align-items:baseline;justify-content:space-between;gap:10px;padding-block:14px 12px;padding-left:18px;padding-right:max(18px,env(safe-area-inset-right,0px));background:var(--c);color:var(--on)}
+.dayhead{box-shadow:0 -3px 0 var(--c);display:flex;align-items:baseline;justify-content:space-between;gap:10px;padding-block:14px 12px;padding-left:18px;padding-right:max(18px,env(safe-area-inset-right,0px));background:var(--c);color:var(--on)}
 .dayhead h2{margin:0;font-weight:500;font-size:17px;letter-spacing:-.01em}
 .dayhead .en{font-size:12px;letter-spacing:.12em;font-weight:500}
 .items{list-style:none;margin:0;padding:0}
@@ -810,7 +810,7 @@ body{background:var(--ivory);color:var(--ink);font-family:var(--f-ko);font-size:
 @media (max-width:760px){
   .side{overflow-y:auto;overscroll-behavior:contain}
   .list{flex:none;overflow:visible}
-  .tabs{position:sticky;top:0;z-index:5;background:var(--ivory)}
+  .tabs{position:sticky;top:0;z-index:5}
   .dayhead{top:calc(var(--tabs-h,58px) - 1px)}
   .item{scroll-margin-top:calc(var(--tabs-h,58px) + 52px)}
 }
@@ -843,7 +843,7 @@ const EMD = {"type":"FeatureCollection","features":[{"type":"Feature","propertie
 const P = {
   sk:["SK렌터카 제주 (공항)",33.50405,126.50103],
   kmb:["제주김만복김밥 본점",33.49706,126.50888],
-  jjs:["카페진정성",33.50247,126.46294],
+  jjs:["카페진정성 종점",33.50247,126.46294],
   iho:["이호테우해변",33.49794,126.45316],
   abb:["아베베 베이커리 제주",33.51266,126.52880],
   ljm:["이재모피자 제주점",33.48520,126.54349],
@@ -855,6 +855,7 @@ const P = {
   brs:["보름숲",33.26928,126.44695],
   luc:["카페 루시아",33.23509,126.36307],
   wie:["위이 wiee",33.31279,126.35915],
+  mur:["무로이",33.30741,126.33659],
   bj:["방주교회",33.30513,126.38726],
   efc:["이에프쿠치나 (2F Cucina)",33.40023,126.24946],
   hj:["협재해수욕장",33.39429,126.23988],
@@ -872,7 +873,7 @@ const DAYS = [
  {d:1,label:"첫째 날",date:"10.31 SAT",items:[
   {t:"07:45",title:"제주 도착, 렌터카 찾기",p:["sk"]},
   {t:"08:30",title:"아침",p:["kmb"]},
-  {t:"09:30",title:"이호테우해변 구경, 카페진정성",p:["iho","jjs"],note:"Google 지도 기준 카페진정성 오픈 10:00."},
+  {t:"09:30",title:"카페진정성, 이호테우해변 구경",sub:"카페진정성 종점 09:00 오픈",p:["jjs","iho"]},
   {t:"11:30",title:"점심",p:["ljm"],note:"Google 지도 기준 오픈 10:00, 일요일 휴무·토요일 영업."},
   {t:"13:00",title:"애월 해안 드라이브, 한담해변 잠깐 구경",p:["hd"]},
   {t:"14:00",title:"대정읍 해안도로 돌고래 스팟",sub:"못 보면 둘째 날 아침에 다시",p:["dol"]},
@@ -883,7 +884,7 @@ const DAYS = [
  ]},
  {d:2,label:"둘째 날",date:"11.01 SUN",items:[
   {t:"09:00",title:"출발",sub:"첫째 날 돌고래를 못 봤으면 대정 돌고래 스팟 들렀다가 아침",p:["pn"],ghost:true},
-  {t:"09:30",title:"아침",p:["luc","wie"],alt:true,note:"Google 지도 기준 위이 오픈 10:00 · 카페 루시아 09:30."},
+  {t:"09:30",title:"아침",sub:"셋 중 한 곳",p:["luc","wie","mur"],alt:true,note:"오픈 시간: 무로이 09:30 · 카페 루시아 09:30, 위이 10:00(Google 지도 기준, 네이버 지도로 확인 필요)."},
   {t:"11:00",title:"방주교회 예배",p:["bj"]},
   {t:"13:00",title:"점심 (퓨전양식)",sub:"예약 완료",p:["efc"]},
   {t:"14:30",title:"협재해수욕장 구경",sub:"짧게 구경, 커피 사서 바로 출발",p:["hj"]},
@@ -999,11 +1000,18 @@ function select(d,i,j,fly=true){
   setTimeout(()=>{ m.openPopup(); const el=m.getElement()?.querySelector(".pin"); el&&el.classList.add("big"); }, fly?720:0);
 }
 
+// After switching tabs, show the schedule from item 1.
+// Desktop: the list scrolls. Phone: the whole panel scrolls, so stop at the tabs (title stays hidden if already scrolled past).
+function toTop(){
+  const list=document.getElementById("list"), side=document.querySelector(".side"), tabsEl=document.querySelector(".tabs");
+  list.scrollTop=0;
+  if(side.scrollHeight>side.clientHeight){ const y=Math.ceil(document.querySelector(".brand").getBoundingClientRect().height); if(side.scrollTop>y) side.scrollTop=y; }
+}
 document.querySelector(".tabs").addEventListener("click",e=>{
   const b=e.target.closest(".tab"); if(!b) return;
   current=b.dataset.day;
   document.querySelectorAll(".tab").forEach(t=>t.setAttribute("aria-pressed",t===b));
-  map.closePopup(); render();
+  map.closePopup(); render(); toTop();
   try{localStorage.setItem("jeju-day",current)}catch(_){}
 });
 document.getElementById("list").addEventListener("click",e=>{
